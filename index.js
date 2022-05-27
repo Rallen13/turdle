@@ -19,6 +19,8 @@ var stats = document.querySelector("#stats-section");
 var gameOverBox = document.querySelector("#game-over-section");
 var gameOverGuessCount = document.querySelector("#game-over-guesses-count");
 var gameOverGuessGrammar = document.querySelector("#game-over-guesses-plural");
+var statsTotalGames = document.querySelector("#stats-total-games");
+var statsPercentCorrect = document.querySelector("#stats-percent-correct");
 
 // Event Listeners
 window.addEventListener("load", setGame);
@@ -177,22 +179,36 @@ function changeRow() {
 }
 
 function declareWinner() {
-  recordGameStats();
+  recordGameStats(true);
   changeGameOverText();
   viewGameOverMessage();
   setTimeout(startNewGame, 4000);
 }
 
 function declareLoser() {
-  recordGameStats();
+  recordGameStats(false);
   changeGameLostText();
   viewGameOverMessage();
   setTimeout(startNewGame, 4000);
 }
 
-function recordGameStats() {
-  gamesPlayed.push({ solved: true, guesses: currentRow });
+function recordGameStats(solved) {
+  gamesPlayed.push({ solved: solved, guesses: currentRow });
 }
+//   The total number of games the user has played
+// The percentage of games that the user has won
+// The average number of attempts it has taken the user to win the game
+const getTotalGames = () => {
+  return gamesPlayed.length;
+};
+
+const getPercentageWon = () => {
+  const winningGames = gamesPlayed.filter(game => {
+    return game.solved;
+  });
+  const percentageWon = (winningGames.length / gamesPlayed.length) * 100;
+  return percentageWon;
+};
 
 function changeGameLostText() {
   gameOverBox.innerHTML = `
@@ -266,6 +282,8 @@ function viewStats() {
   viewGameButton.classList.remove("active");
   viewRulesButton.classList.remove("active");
   viewStatsButton.classList.add("active");
+  statsTotalGames.innerText = getTotalGames();
+  statsPercentCorrect.innerText = getPercentageWon();
 }
 
 function viewGameOverMessage() {
