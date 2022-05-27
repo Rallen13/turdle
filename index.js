@@ -22,6 +22,7 @@ var gameOverGuessCount = document.querySelector("#game-over-guesses-count");
 var gameOverGuessGrammar = document.querySelector("#game-over-guesses-plural");
 var statsTotalGames = document.querySelector("#stats-total-games");
 var statsPercentCorrect = document.querySelector("#stats-percent-correct");
+var statsAverageGuesses = document.querySelector("#stats-average-guesses");
 
 // Event Listeners
 window.addEventListener("load", setGame);
@@ -226,8 +227,26 @@ const getPercentageWon = () => {
   const winningGames = gamesPlayed.filter(game => {
     return game.solved;
   });
-  const percentageWon = (winningGames.length / gamesPlayed.length) * 100;
+  let percentageWon;
+  if (gamesPlayed.length === 0) {
+    percentageWon = 0;
+  } else {
+    percentageWon = (winningGames.length / gamesPlayed.length) * 100;
+  }
   return percentageWon;
+};
+
+const getAvgWinGuesses = () => {
+  const winningGames = gamesPlayed.filter(game => {
+    return game.solved;
+  });
+
+  const avgGuesses = winningGames.reduce((acc, game) => {
+    acc += game.guesses;
+
+    return (acc / winningGames.length) * 100;
+  }, 0);
+  return avgGuesses;
 };
 
 function changeGameLostText() {
@@ -304,6 +323,7 @@ function viewStats() {
   viewStatsButton.classList.add("active");
   statsTotalGames.innerText = getTotalGames();
   statsPercentCorrect.innerText = getPercentageWon();
+  statsAverageGuesses.innerText = getAvgWinGuesses();
 }
 
 function viewGameOverMessage() {
