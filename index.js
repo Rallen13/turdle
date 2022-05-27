@@ -20,6 +20,12 @@ var stats = document.querySelector("#stats-section");
 var gameOverBox = document.querySelector("#game-over-section");
 var gameOverGuessCount = document.querySelector("#game-over-guesses-count");
 var gameOverGuessGrammar = document.querySelector("#game-over-guesses-plural");
+var statsTotalGames = document.querySelector("#stats-total-games");
+var statsPercentCorrect = document.querySelector("#stats-percent-correct");
+var statsAverageGuesses = document.querySelector("#stats-average-guesses");
+
+// Event Listeners
+window.addEventListener("load", setGame);
 
 // API call
 const fetchWords = () => {
@@ -118,6 +124,8 @@ function submitGuess() {
     compareGuess();
     if (checkForWin()) {
       setTimeout(declareWinner, 1000);
+    } else if (!checkForWin() && currentRow === 6) {
+      setTimeout(declareLoser, 1000);
     } else {
       changeRow();
     }
@@ -192,14 +200,60 @@ function changeRow() {
 }
 
 function declareWinner() {
-  recordGameStats();
+  recordGameStats(true);
   changeGameOverText();
   viewGameOverMessage();
   setTimeout(startNewGame, 4000);
 }
 
-function recordGameStats() {
-  gamesPlayed.push({ solved: true, guesses: currentRow });
+function declareLoser() {
+  recordGameStats(false);
+  changeGameLostText();
+  viewGameOverMessage();
+  setTimeout(startNewGame, 4000);
+}
+
+function recordGameStats(solved) {
+  gamesPlayed.push({ solved: solved, guesses: currentRow });
+}
+//   The total number of games the user has played
+// The percentage of games that the user has won
+// The average number of attempts it has taken the user to win the game
+const getTotalGames = () => {
+  return gamesPlayed.length;
+};
+
+const getPercentageWon = () => {
+  const winningGames = gamesPlayed.filter(game => {
+    return game.solved;
+  });
+  let percentageWon;
+  if (gamesPlayed.length === 0) {
+    percentageWon = 0;
+  } else {
+    percentageWon = (winningGames.length / gamesPlayed.length) * 100;
+  }
+  return percentageWon;
+};
+
+const getAvgWinGuesses = () => {
+  const winningGames = gamesPlayed.filter(game => {
+    return game.solved;
+  });
+
+  const avgGuesses = winningGames.reduce((acc, game) => {
+    acc += game.guesses;
+
+    return (acc / winningGames.length) * 100;
+  }, 0);
+  return avgGuesses;
+};
+
+function changeGameLostText() {
+  gameOverBox.innerHTML = `
+  <h3 id="game-over-message">BOO!</h3>
+  <p class="informational-text">You failed!</p>
+  `;
 }
 
 function changeGameOverText() {
@@ -267,6 +321,9 @@ function viewStats() {
   viewGameButton.classList.remove("active");
   viewRulesButton.classList.remove("active");
   viewStatsButton.classList.add("active");
+  statsTotalGames.innerText = getTotalGames();
+  statsPercentCorrect.innerText = getPercentageWon();
+  statsAverageGuesses.innerText = getAvgWinGuesses();
 }
 
 function viewGameOverMessage() {
