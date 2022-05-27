@@ -3,6 +3,7 @@ var winningWord = "";
 var currentRow = 1;
 var guess = "";
 var gamesPlayed = [];
+var words;
 
 // Query Selectors
 var inputs = document.querySelectorAll("input");
@@ -24,6 +25,25 @@ var statsPercentCorrect = document.querySelector("#stats-percent-correct");
 
 // Event Listeners
 window.addEventListener("load", setGame);
+
+// API call
+const fetchWords = () => {
+  return fetch("http://localhost:3001/api/v1/words")
+    .then(response => response.json())
+    .then(data => data)
+    .catch(error => console.log("Words API error!"));
+};
+
+const fetchData = () => {
+  return Promise.all([fetchWords()]).then(data => {
+    words = data[0];
+    setGame();
+    console.log(words);
+  });
+};
+
+// Event Listeners
+window.addEventListener("load", fetchData);
 
 for (var i = 0; i < inputs.length; i++) {
   inputs[i].addEventListener("keyup", function() {
